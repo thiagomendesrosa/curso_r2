@@ -1,19 +1,21 @@
 --- 
 title: "Curso R"
 author: "Thiago Mendes Rosa"
-date: "`r Sys.Date()`"
-output:
-  html_document:
-    highlighting: tango
-    number_sections: yes
-    theme: flatly
-    toc: yes
-    toc_float: yes
+date: "`r format(Sys.Date(),'%d/%m/%Y')`"
+output: 
+  html_document: rmdformats::readthedown
+    # highlighting: zenburn
+    # number_sections: yes
+    # theme: darkly
+    # toc: yes
+    # toc_float:
+    #   collapsed: false
+    #  smooth_scroll: false
   pdf_document:
     toc: yes
 link-citations: yes
 fontsize: 18pt
-description: Minicurso de R aplicado a manipulação de microdados da Codeplan
+description: Minicurso de R aplicado a manipulação de microdados da PDAD 2018
 ---
 
 ```{r, echo=F}
@@ -178,31 +180,34 @@ citation("tidyverse")
 Dentro do R, alguns operadores básicos são constantemente utilizados. Os mais comuns são:
 
 ```{r, echo=F,results='asis'}
-pander::pander(
+knitr::kable(
 data.frame(Operadores=c("+","-","*","/","^ ou **", "%%","%/%"),
            Descrição=c("Adição","Subtração","Multiplicação",
                        "Divisão","Exponenciação","Resto da divisão","Divisão inteira")),
-caption="Operadores aritiméticos")
+caption="Operadores aritiméticos") %>% 
+  kableExtra::kable_styling(full_width=T) 
 ```
 
 ```{r, echo=F,results='asis'}
-pander::pander(
+knitr::kable(
 data.frame(Operadores=c("<","<=",">",">=","==","!=","!X","X|Y","X&Y"),
            Descrição=c("Menor","Menor ou igual","Maior","Maior ou igual",
                        "Exatamente igual a","Não é igual a","Não X",
                        "X ou Y","X e Y")),
-caption="Operadores lógicos")
+caption="Operadores lógicos") %>% 
+  kableExtra::kable_styling(full_width=T) 
 ```
 
 ```{r, echo=F,results='asis'}
-pander::pander(
+knitr::kable(
 data.frame(Operadores=c("x <- valor","x <<- valor",
                         "valor -> x","valor ->> x",
                         "x = valor"),
            Descrição=c("Atribuir 'valor' a 'x'","Atribuir 'valor' a 'x'",
                        "Atribuir 'valor' a 'x'","Atribuir 'valor' a 'x'",
                        "Atribuir 'valor' a 'x'")),
-caption="Operadores de atribuição de valor")
+caption="Operadores de atribuição de valor") %>% 
+  kableExtra::kable_styling(full_width=T) 
 ```
 
 Algumas teclas de atalho podem ser bastante úteis na hora de escrever os códigos. Veja algumas das principais:
@@ -724,9 +729,9 @@ library(dplyr)
 
 # Consultar as tabelas disponíveis
 pdad_2018_moradores %>%
-  # Filtrar apenas linhas do esquema PDAD
+  # Filtrar apenas linhas do Plano Piloto
   dplyr::filter(A01ra==1) %>%
-  # Selecionar apenas a coluna com as tabelas
+  # Selecionar apenas a coluna da RA
   dplyr::select(A01ra)
 ```
 
@@ -736,12 +741,14 @@ Muitas vezes precisamos alterar o nome de uma coluna, seja para tornar seu enten
 
 
 ```{r}
-# Alterar o nome da coluna "TABLE_SCHEM" para Esquema
+# Alterar o nome da coluna "A01ra" para RA
 colnames(pdad_2018_moradores)[2] <- "RA"
+
+# Consultar os nomes
 names(pdad_2018_moradores)
 
+# Retornar o nome para "A01ra"
 names(pdad_2018_moradores)[2] <- "A01ra"
-
 
 # Alterar o nome com o dplyr
 pdad_2018_moradores %>%
@@ -753,6 +760,9 @@ pdad_2018_moradores %>%
   dplyr::distinct() %>% 
   # Organizar de forma decrescente
   dplyr::arrange(-RA)
+
+# Retornar o nome para "A01ra"
+names(pdad_2018_moradores)[2] <- "A01ra"
 ```
 
 Vamos usar o que aprendemos para verificar, de maneira rápida, quantas pessoas foram entrevistadas em cada RA.
@@ -862,7 +872,9 @@ table(ra_codificada$ra)
 ```
 
 Apesar de parecer mais complexo, isso evita que tenhamos de copiar, colar ou escrever manualmente o nome de todas as 31 Regiões Administrativas. Se o número de categorias fosse mais elevado, certamente esses passos seriam fundamentais para dar agilidade à tarefa a ser realizada.
+
 Agora que já conseguimos identificar qual foi a amostra em cada uma das RAs, vamos fazer uma gráfico simples, para verificarmos onde obtivemos as maiores amostras. Para isso, vamos usar a o pacote `ggplot`.
+
 O `ggplot` trabalha com data.frames, e não somente com vetores individuais, como é o caso da função `plot`, disponível no pacote `graphics` do R. Uma vantagem do `ggplot` é que você pode adicionar camadas a um gráfico existente de maneira simples e rápida, com o operador `+`. A função `aes()` é utilizada para especificar quais serão os eixos do gráfico, usualmente x e y. Para um tutorial mais completo, acesse [esse site](http://r-statistics.co/Complete-Ggplot2-Tutorial-Part1-With-R-Code.html).
 
 ```{r}
@@ -932,6 +944,7 @@ Hmisc::describe(pdad_2018_domicilios)
 Manipular string pode ser muito importante em uma pesquisa. Vamos ver como podemos detectar algumas expressões com o pacote `stringr`.
 
 Abaixo você encontra alguns exemplos de operadores ao utilizar strings:
+
 - **'can'**: # reconhece tudo que tenha "can", mas não ignora maiúsculas
 - **'CAN'**: # reconhece tudo que tenha "CAN", mas não ignora minúsculas
 - **'can$'**: # reconhece apenas o que termina exatamente em "can"
@@ -954,14 +967,16 @@ Veja como funcionam os testes lógicos.
 
 ```{r, results='asis', echo=FALSE}
 list(strings = s, expressoes = expressoes) %>%
-  cross_df() %>%
-  distinct() %>%
-  mutate(detect = str_detect(s, expressoes)) %>%
-  spread(expressoes, detect) %>%
-  pander::pander(caption = "Teste lógicos de strings")
+  purrr::cross_df() %>%
+  dplyr::distinct() %>%
+  dplyr::mutate(detect = str_detect(s, expressoes)) %>%
+  tidyr::spread(expressoes, detect) %>%
+  knitr::kable(caption = "Teste lógicos de strings") %>% 
+  kableExtra::kable_styling(full_width=T) 
 ```
 
 Para se verificar quantas vezes um caractere se repete, dado um determinado padrão, utilizamos os símbolos `+`, `*` e `{x,y}`.
+
 - `ey+` significa `e` e depois `y` "**uma vez** ou mais". Por exemplo, reconhece `hey`, `heyy`, `a eyyy`, mas não reconhece `e`, `y` nem `yy`.
 - `ey*` significa "**nenhuma vez** ou mais". Por exemplo, reconhece `hey`, `heyy`, `a eyyy` e `e`, mas não reconhece `y` nem `yy`.
 - `ey{3}` significa "exatamente três vezes". Por exemplo, reconhece `eyyy` e `eyyyy`, mas não reconhece `eyy`.
@@ -971,15 +986,15 @@ Para aplicar um quantificador a um conjunto de caracteres, usamos os parênteses
 
 Colocando caracteres dentro de `[]`, reconhecemos quaisquer caracteres desse conjunto. Por exemplo:
 
-- `[Cc]urso` para reconhecer "curso" em maiúsculo ou minúsculo.
+- `[Cc]urso` para reconhecer "curso" com o primeiro "c" em maiúsculo ou minúsculo.
 - `[0-9]` para reconhecer somente números. Para letras: `[a-z]`, `[A-Z]`, `[a-zA-Z]`
 - O símbolo `^` dentro do colchete indica negação. Por exemplo, `[^0-9]` significa todos os caracteres, exceto números.
-- O símbolo `.` fora do colchete indica "qualquer caractere". Dentro do colchete é apenas um caractere
+- O símbolo `.` fora do colchete indica "qualquer caractere". Dentro do colchete é apenas um caractere.
 - Com `[[:space:]]` reconhecemos espaços, com `[[:blank:]]` reconhecemos espaços em branco e tabulações, com `[[:lower:]]` reconhecemos minúsculas, com `[[:upper:]]` reconhecemos minúsculas e com `[[:punct:]]+` reconhecemos pontuações.
 
 ## Trabalhando com datas
 
-Vez ou outra nos deparamos com bases de dados que contêm variáveis do tipo data. Dentro da família `tidyverse`, temos o pacote `lubridate`, que facilita muito a manipulação deste tipo de dado. Na PDAD 2018, temos a variável `datavisita`, que traz o dia em que as informações foram coletadas no domicílio. Vamos utilizar essa variável para manipular datas.
+Vez ou outra nos deparamos com bases de dados que contêm variáveis do tipo data. Fora da família `tidyverse`, temos o pacote `lubridate`, que facilita muito a manipulação deste tipo de dado. Na PDAD 2018, temos a variável `datavisita`, que traz o dia em que as informações foram coletadas no domicílio. Vamos utilizar essa variável para manipular datas.
 
 Vamos verificar como estão preenchidas as primeiras linhas dessa coluna, com auxílio da função `head()`.
 
@@ -1077,6 +1092,7 @@ pdad_2018_domicilios %>%
 Agora que geramos a tabela com as informações de coleta, vamos salvar os resultados em um arquivo `.csv`. Para isso, vamos utilizar a função `write.table()`, do pacote `utils`. Com a função, informe o objeto que você quer utilizar para gerar o arquivo no primeiro argumento e o nome do arquivo a ser gerado no segundo argumento. O arquivo será salvo no seu diretório de trabalho, por padrão. Caso você queria salvá-lo em outro local, basta informar o caminho desejado antes do nome do arquivo (e.g. `bases/`, para salvar em um subdiretório chamado bases).
 
 Assim como as colunas possuem nomes, as linhas também podem ser nomeadas no R. Quando não damos um nome específico para as linhas, elas são, por padrão, nomeadas com números inteiros sequenciais, de 1 até o número de linhas da tabela. Consulte essa informação com a função `row.names()`.
+
 Como não queremos que essas informações apareçam na nossa tabela, utilizamos o argumento `row.names = F` no momento de escrevermos a tabela. Além disso, o arquivo será gerado, por padrão, delimitado por espaços. Vamos alterar o delimitador para ponto e vírgula `;`. Poderíamos escolher qualquer outro delimitador desejado.
 
 ```{r }
@@ -1088,7 +1104,7 @@ Vamos verificar o resultado localmente. Procure no diretório o arquivo que acab
 
 ## Operações com datas
 
-Vamos agora aprender a fazer operações com datas. Vamos calcula o intervalo existente entre a data de referência da pesquisa e a data da coleta.
+Vamos agora aprender a fazer operações com datas. Vamos calcular o intervalo existente entre a data de referência da pesquisa e a data da coleta.
 
 ```{r}
 # Criar um objeto com a data de referência da pesquisa
@@ -1127,35 +1143,52 @@ Assim, percebemos que houve um pico de coletas logo após a data de referência 
 
 ## Criando mapas
 
-Com o R, é possível fazermos mapas com relativa facilidade. Para tanto, precisaremos de informações geográficas dos mapas que queremos desenhar. Como estamos utilizando a PDAD 2018, iremos fazer um mapa utilizando as poligonais da pesquisa. Vamos fazer conexão com o banco de dados do núcleo de geografia e pegar as informações necessárias.
+Com o R, é possível fazermos mapas com relativa facilidade. Para tanto, precisaremos de informações geográficas dos mapas que queremos desenhar. Como estamos utilizando a PDAD 2018, iremos fazer um mapa utilizando as poligonais da pesquisa. Vamos aprender a usar o R para baixar informações da internet diretamente no computador.
 
 ```{r, eval=FALSE}
-library(RPostgreSQL)
-library(postGIStools)
 library(ggrepel)
 library(sf)
 library(rgdal)
-db_geo <- DBI::dbConnect(PostgreSQL(),dbname = "nucleo_geo", 
-                      user = Sys.getenv("user_geo"),
-                      host=Sys.getenv("host_geo"),
-                      password = Sys.getenv("senha_geo"))
-RA <- postGIStools::get_postgis_query(db_geo, "SELECT * FROM nivel_territorial.tb_ra_pdad_2018 ",
-                        geom_name = "geom")
-pontos <- fortify(RA) %>%
-  dplyr::group_by(id) %>%
-  dplyr::summarise(lat=mean(lat),
-                   long=mean(long)) %>%
-  dplyr::mutate(id=as.integer(id))
-RA <- sf::st_as_sf(RA)
-pdad_mor<- DBI::dbGetQuery(db,"select A01ra, FATOR_PROJ from pdad.mor2018") %>%
+
+# tf<- "https://www.geoportal.seduh.df.gov.br/static/shapes_download/Regi%C3%B5es%20Administrativas.zip"
+
+# Link para o arquivo shape
+tf <- "http://catalogo.codeplan.df.gov.br/geoserver/wfs?format_options=charset%3AUTF-8&typename=geonode%3Aras_pdad_2013&outputFormat=SHAPE-ZIP&version=1.0.0&service=WFS&request=GetFeature"
+
+# Caminho para salvar o arquivo
+td <- "dados/shape31.zip"
+
+# Fazer o download do arquivo
+download.file(tf, td, mode="wb")
+
+# Descompactar o arquivo
+unzip(td,exdir="dados")
+
+# Listar os arquivos da pasta dados
+list.files('dados',pattern=".shp")
+
+# Carregar o arquivo .shp
+mapa <- sf::st_read("dados/ras_pdad_2013.shp") 
+
+# Calcular o total de moradores por RA
+mor <- pdad_2018_moradores %>%
   dplyr::group_by(A01ra) %>%
   dplyr::summarise(n=sum(FATOR_PROJ)) 
-map<-
-RA %>%
-  dplyr::left_join(pdad_mor,by=c("ra_num"="A01ra")) %>%
+
+# Criar um objeto com os centros dos polígonos
+pontos <- mapa %>% 
+  sf::st_centroid() %>%
+  dplyr::mutate(lat=sf::st_coordinates(.)[,1],
+                long=sf::st_coordinates(.)[,2]) %>% 
+  dplyr::select(ra_num,lat,long) %>% 
+  sf::st_set_geometry(NULL)
+  
+# Fazer o mapa
+map <-  mapa %>%
+  dplyr::left_join(mor,by=c("ra_num"="A01ra")) %>%
   dplyr::left_join(pontos) %>%
   dplyr::mutate(nome2=factor(ra_num,
-                            levels=sort(RA$ra_num),
+                            levels=sort(mapa$ra_num),
                             labels=c('Plano Piloto',      
                                      'Gama',
                                      'Taguatinga',
@@ -1202,14 +1235,15 @@ RA %>%
         legend.title = element_text(size = 14),
         legend.text = element_text(size = 12)) +
   #geom_text(aes(long, lat, label = nome), colour = "white")+
-  geom_label_repel(aes(long, lat, label = nome2),size=5, fontface="bold", family="Arial",
+  geom_label_repel(aes(lat, long, label = nome2),size=3, fontface="bold", family="Arial",
                    label.padding=unit(0.10,"line")) +
   labs(x="",y="") 
-ggsave(map,filename = "figuras/mapa_pop.png",
-       bg = "transparent",
-       width = 30, 
-       height = 18, 
-       units = "cm")
+
+# ggsave(map,filename = "figuras/mapa_pop.png",
+#        bg = "transparent",
+#        width = 30, 
+#        height = 18, 
+#        units = "cm")
 ```
 
 <img src="figuras/mapa_pop.png" style="width: 600px;display: block;margin-left: auto;margin-right: auto "/>
@@ -1220,7 +1254,7 @@ Recorrentemente, precisamos atualizar valores monetários. Para isso, vamos util
 
 <img src="figuras/sidra.png" style="width: 800px;display: block;margin-left: auto;margin-right: auto "/>
 
-Após baixar os dados, vamos manipular os dados para criar inflatores para a a atualização dos valores monetários.
+Após baixar os dados, vamos manipular os dados para criar inflatores para a atualização dos valores monetários.
 
 ```{r}
 # Carregar pacote sidrar
@@ -1245,7 +1279,8 @@ inflacao_df <- inflacao %>%
                    inflator=inflator)
 ```
 
-Agora, temos um inflator para atualizar os valores monetários da PDAD 2018 para o mês mais recente (maio de 2019). Iremos utilizar essa informação mais tarde, para construirmos a renda em valores atualizados.
+Agora, temos um inflator para atualizar os valores monetários da PDAD 2018 para o mês mais recente da tabela (dezembro de 2019). Iremos utilizar essa informação mais tarde, para construirmos a renda em valores atualizados.
+
 Vamos aproveitar a base do IPCA para aprendermos uma manipulação muito importante de bases de dados. Para fazer gráficos, o formato `long` é muito útil, enquanto o formato `wide` apresenta a tabela no formato de colunas. Vamos treinar estes conceitos carregando a inflação, dos últimos 12 meses, do DF, do Brasil, de São Paulo e do Rio de Janeiro.
 
 ```{r}
@@ -1281,8 +1316,8 @@ inflacao_long %>%
   dplyr::mutate(referencia=lubridate::dmy(paste("01",
                                                 stringr::str_sub(referencia,5,6),
                                                 stringr::str_sub(referencia,1,4)))) %>%
-  # Filtrar para o último ano (de maio a maio)
-  dplyr::filter(referencia>=lubridate::dmy("01-05-2018")) %>%
+  # Filtrar para o último ano (de dezembro a dezembro)
+  dplyr::filter(referencia>=lubridate::dmy("01-12-2018")) %>%
   # Plotar o gráfico, com a referência no eixo x,
   # a inflação no eixo y e a localidade colorindo as linhas
   ggplot(aes(x=referencia,y=Valor,colour=Local))+
@@ -1350,7 +1385,9 @@ mean(renda_domiciliar$renda_dom, na.rm=T)
 ```
 
 O valor amostral é de R\$ `r round(mean(renda_domiciliar$renda_dom, na.rm=T))` (ainda não considera a expansão, que será vista no próxima seção).
+
 # Manipulação da PDAD 2018 com expansão dos resultados
+
 Conforme dito anteriormente, a PDAD 2018 é uma pesquisa amostral, desenhada para fornecer a caracterização socioeconômica e demográfica das 31 Regiões Administrativas, sendo ainda mais específicas para algumas delas (como Águas Claras, Ceilândia, Plano Piloto e São Sebastião), totalizando 38 localidades. Assim, são passos necessários para essa tarefa: definir os limites territoriais; definir a área de interesse dentro desses territórios; ter uma listagem dos domicílios existentes nessas localidades (obtida a partir dos cadastros da CEB, CAESB e listagens próprias).
 
 A delimitação das Regiões Administrativas considerada pela PDAD 2018 pode ser observada na imagem abaixo:
@@ -1362,18 +1399,21 @@ E a área de cobertura considera foi a seguinte:
 <img src="figuras/mapa1.jpeg" style="width: 600px;display: block;margin-left: auto;margin-right: auto "/>
 
 A área acima corresponde às áreas urbanas e às áreas rurais com características urbanas, abrangendo a moradia de mais de 97% da população do DF.
+
 Dentro da área de cobertura, foram selecionados quase 30 mil domicílios. A imagem abaixo ilustra o conceito de amostragem aplicado à PDAD (imagem extraída do site  [mathcaptain.com](http://www.mathcaptain.com/statistics/stratified-sampling.html)).   
 
 <img src="figuras/stratified_sample.png" style="width: 400px;display: block;margin-left: auto;margin-right: auto "/>
 
 Sendo assim, as estimativas fornecidas pela pesquisa estão sujeitas a um erro amostral, o que torna necessária a consideração de seu desenho amostral para seu cálculo. É com essas informações que construímos intervalos de confiança para as estimativas. De maneira simples, queremos fornecer, com algum grau de confiança, qual o verdadeiro valor populacional dada a amostra coletada.
+
 A população considerada para a PDAD 2018 parte das estimativas populacionais para o DF, publicadas pelo Instituto Brasileiro de Geografia e Estatística (IBGE), em setembro de 2018. Essa população foi alocada nas RAs pela equipe da Dipos/Codeplan e ajustada para a área de alcance da PDAD 2018. A diferença entre as projeções populacionais, disponíveis [neste link](http://www.codeplan.df.gov.br/wp-content/uploads/2018/02/Proje%C3%A7%C3%B5es-Populacionais-Estruturas-Et%C3%A1rias-por-RA-2010-2020.xlsx), e os resultados da PDAD se devem às diferenças entre a área de alcance da PDAD, a população de interesse e as delimitações consideradas.^[Conforme apontado anteriormente, a PDAD investiga domicílios particulares em áreas urbanas e áreas rurais com características urbanas. Assim sendo, todos os domicílios coletivos e aqueles situados em áreas rurais são desconsiderados na pesquisa. Além disso, existem algumas diferenças entre as delimitações das RAS consideradas nas projeções e na PDAD.]
 
-Nessa oficina iremos aprender a declarar o plano amostral da PDAD 2018 no R, utilizando o pacote `survey`. Vamos utilizar também o pacote `srvyr`, que roda o pacote `survey` sob a lógica do pacote `dplyr`, para calcular as estimativas.
+Neste curso iremos aprender a declarar o plano amostral da PDAD 2018 no R, utilizando o pacote `survey`. Vamos utilizar também o pacote `srvyr`, que roda o pacote `survey` sob a lógica do pacote `dplyr`, para calcular as estimativas.
 
 ## Declarar o plano amostral da PDAD 2018
 
 Antes de declararmos o plano amostral da PDAD 2018, vamos trabalhar com a união das bases de moradores e domicílios. Muitas vezes precisamos cruzar as características de moradia com as pessoais. Por exemplo, se quisermos saber os anos de estudo médio dos responsáveis por domicílios sem esgotamento sanitário adequado, precisamos utilizar as duas bases de dados simultaneamente.
+
 Para realizar este trabalho, vamos utilizar a função `left_join()` do pacote `dplyr`. A junção de bases pode ser feita sob várias perspectivas. Veja a figura abaixo (extraída [desse site](https://twitter.com/yutannihilation/status/551572539697143808)).
 
 <img src="figuras/join.png" style="width: 400px;display: block;margin-left: auto;margin-right: auto "/>
@@ -1409,6 +1449,7 @@ pdad <- pdad_2018_moradores %>%
       # Filtrar as colunas repetidas
       dplyr::select(-c(A01ra,FATOR_PROJ)),
 by=c("A01nFicha"="A01nFicha")) %>% 
+  # Mudar a variável pos-estrato para o tipo character
   dplyr::mutate(POS_ESTRATO=as.character(POS_ESTRATO))
 ```
 
@@ -1478,7 +1519,7 @@ options( survey.lonely.psu = "adjust")
 amostra <- srvyr::as_survey(amostra)
 ```
 
-Pronto! Já temos o objeto com as informações da PDAD que iremos trabalhar no restante desta oficina. Vamos testar estimando o total de pessoas com 18 anos ou mais de idade no Distrito Federal. O nosso objeto base agora será o `amostra`, com o qual utilizaremos o pacote `srvyr`. Com a parâmetro `vartype='ci'`, obtemos as estimativas dos intervalos de confiança. 
+Pronto! Já temos o objeto com as informações da PDAD que iremos trabalhar no restante deste curso. Vamos testar estimando o total de pessoas com 18 anos ou mais de idade no Distrito Federal. O nosso objeto base agora será o `amostra`, com o qual utilizaremos o pacote `srvyr`. Com a parâmetro `vartype='ci'`, obtemos as estimativas dos intervalos de confiança. 
 
 ```{r}
 # População DF com mais de 18 anos
@@ -1626,9 +1667,9 @@ vars_relatorio %>%
   srvyr::group_by(idade_faixas,sexo) %>%
   # Calcular os totais
   srvyr::summarise(n=survey_total(na.rm = T, vartype = "ci"))
+
 # Fazer o gráfico com a pirâmide
-piramide_grafico <-
-piramide %>%
+piramide_grafico <- piramide %>%
   # Construir um plot com as idades no eixo x, as quantidades no eixo y,
   #  preenchimento com a variável sexo, e os intervalos de confiança
   # inferiores e superiores
@@ -1677,9 +1718,9 @@ salario <- vars_relatorio %>%
   srvyr::group_by(faixas_salario) %>%
   # Calcular os totais para cada grupo de salário
   srvyr::summarise(n=survey_total(na.rm=T,vartype = "ci"))
+
 # Construir um objeto com o gráfico
-salario_grafico <-
-salario %>%
+salario_grafico <- salario %>%
   # Plotar os eixos x e y
   ggplot(aes(x=faixas_salario, y=n))+
   # Construir o gráfico de barras
@@ -1743,9 +1784,9 @@ esgotamento <- vars_relatorio %>%
   srvyr::group_by(esgotamento_caesb) %>%
   # Calcular a proporção de cada grupo
   srvyr::summarise(n=survey_mean(na.rm = T,vartype = "ci"))
+
 # Construir o objeto com o gráfico
-esgotamento_grafico <-
-esgotamento %>%
+esgotamento_grafico <- esgotamento %>%
   # Plotar os eixos x e y, reordenando os fatores, do maior para o menor resultado
   ggplot(aes(x=fct_reorder(esgotamento_caesb,-n),y=n,ymin=n_low,ymax=n_upp))+
   # Construir o gráfico de barras
@@ -1772,6 +1813,7 @@ Vamos ver como fazer um gráfico de setores, com as mesmas informações anterio
 ```{r}
 # Carregar o pacote ggrepel
 library(ggrepel)
+
 # Construir o objeto com as informações de esgotamento sanitário
 esgotamento2 <- vars_relatorio %>%
   # Filtar para o responsável
@@ -1801,6 +1843,7 @@ tema_branco <- theme_minimal()+
     panel.grid=element_blank(),
     # Retirar os ticks
     axis.ticks = element_blank())
+
 # Construir o gráfico de pizza
 esgotamento2 %>%
   # Plotar o gráfico, com as quantidades no eixo y, o preenchimento com as categorias,
@@ -1895,6 +1938,7 @@ Os códigos de R podem ser inseridos juntamente com os textos, dentro de acentos
 
 ```{r}
 # `r rnow(pdad_2018_moradores)` Isto é um código r dentro de um texto markdown
+
 # Abaixo temos um exemplo de chunk
 #```{r}
 # table(pdad_2018_moradores$A01ra)
@@ -1902,20 +1946,26 @@ Os códigos de R podem ser inseridos juntamente com os textos, dentro de acentos
 ```
 
 Os títulos das seções são criados com o símbolo `#`. Caso queiramos criar subseções, vamos adicionando sequências do mesmo símbolo.
-Após ser escrito o relatório, precisamos compilar o documento, que é realizado com o auxílio dos pacotes `knit` e `pandoc`. O primeiro deles cria um arquivo com os elementos textuais e do R, no formato `.md`, que posteriormente é convertido para o formato desejado com o segundo pacote.
+
+Após ser escrito o relatório, precisamos compilar o documento, que é realizado com o auxílio dos pacotes `knitr` e `pandoc`. O primeiro deles cria um arquivo com os elementos textuais e do R, no formato `.md`, que posteriormente é convertido para o formato desejado com o segundo pacote.
 
 <img src="https://d33wubrfki0l68.cloudfront.net/61d189fd9cdf955058415d3e1b28dd60e1bd7c9b/9791d/images/rmarkdownflow.png" style="width: 800px;display: block;margin-left: auto;margin-right: auto "/>
 
-Rode o arquivo de exemplo, clicando no botão `knit`, para verificar o resultado. O RStudio pedirá para você indicar o nome e o local do arquivo a ser criado. Toda vez que você "tricotar" o documento, o R salva e executa todos os passos elencados anteriormente automaticamente. 
+Rode o arquivo de exemplo, clicando no botão `knit`, para verificar o resultado. 
+O RStudio pedirá para você indicar o nome e o local do arquivo a ser criado. Toda vez que você "tricotar" o documento, o R salva e executa todos os passos elencados anteriormente automaticamente. 
 
 <img src="figuras/tricote.png" style="width: 800px;display: block;margin-left: auto;margin-right: auto "/>
 
-Vamos agora criar o nosso relatório. Para isso, vamos utilizar apenas dois pacotes do $\LaTeX$, o `babel`, para conseguirmos produzir o relatório em português, e o pacote `inputenc`, que cuidará do encoding dos caracteres. Fazemos isso adicionando no preâmbulo do documento a linha `header-includes:`, indicando os pacotes do $\LaTeX$ a serem utilizados. Qualquer outro pacote pode ser inserido neste espaço. Para rodar o relatório em PDF, você precisará ter alguma distribuição do `TeX/LaTeX`. Uma opção é o [MiKTeK](https://miktex.org/download). Durante a instalação, marque a opção *"Install missing packages on-the-fly"* como *"yes"*.
+Vamos agora criar o nosso relatório. Para isso, vamos utilizar apenas dois pacotes do $\LaTeX$, o `babel`, para conseguirmos produzir o relatório em português, e o pacote `inputenc`, que cuidará do encoding dos caracteres. 
+
+Fazemos isso adicionando no preâmbulo do documento a linha `header-includes:`, indicando os pacotes do $\LaTeX$ a serem utilizados. Qualquer outro pacote pode ser inserido neste espaço. Para rodar o relatório em PDF, você precisará ter alguma distribuição do `TeX/LaTeX`. Uma opção é o [MiKTeK](https://miktex.org/download). Durante a instalação, marque a opção *"Install missing packages on-the-fly"* como *"yes"*.
 
 Comumente, utilizamos o primeiro *chunk* para inserir as configurações e opções a serem utilizadas no decorrer do documento. Note que utilizamos a opção `include=FALSE` para que este *chunk* não seja incluído no documento. Nele, carregamos os pacotes necessários, ajustamos as configurações padrão dos demais *chunks*, carregamos a base e ajustamos uma configuração do pacote `xtable`, que será utilizado para gerar nossas tabelas no formato $\LaTeX$. 
+
 No meio do documento, podemos utilizar qualquer comando $\LaTeX$, da mesma maneira que faríamos, caso estivéssemos trabalhando com a ferramenta. Alguns atalhos facilitam uma série de formatações, como palavras em itálico, escritas entre asteriscos `*palavra*` e negrito, escritas entre duplos asteriscos `**palavra**`. Notas de rodapé são facilmente inseridas entre colchetes, precedido de um acento circunflexo `^[nota de rodapé]`. 
 
 Para inserirmos uma figura criada com o pacote `ggplot`, devemos "abrir" um *chunk* e chamar o objeto dentro dele. Para inserir o título da figura e seu respectivo *label*, utilizamos a opção `fig.cap="Título"`, no início do *chunk*. O *label* deve ser adicionado por dentro do título, com o comando `\\label{}`, este último derivado do $\LaTeX$. Repare que, neste caso, foi necessário inserir uma segunda barra invertida, de modo que o R entenda que estamos querendo utilizar um comando do $\LaTeX$ dentro do *chunk*. Para fazer referência ao elemento, utilize o comando `\ref{}` dentro do texto.
+
 Para as tabelas, utilizamos o pacote `xtable`. Diferentemente das figuras, este pacote já esta preparado para receber as informações de título e *label* da tabela em parâmetros específicos, convertendo o resultado para a linguagem $\LaTeX$. Para algumas formatações adicionais, como separador de milhar, posicionamento da tabela e marcador decimal, precisamos da função `print()`.
 
 ```{r}
@@ -2026,8 +2076,8 @@ O relatório criado em PDF pode ser facilmente gerado em outros formatos. Experi
 
 Para configurar suas credenciais no github, digite no terminal os seguintes comandos:
 
-- git config --global user.name "nome de usuário"
-- git config --global user.password "senha"
+- git config --global user.name "seu nome de usuário"
+- git config --global user.password "sua senha"
 
 Depois de produzirmos nossos códigos, vamos subir as informações para o nosso repositório no GitHub. Para isso, temos três opões:
 
@@ -2043,11 +2093,12 @@ Pelo primeiro e terceiro métodos, a janela abaixo será exibida. Com o segundo 
 
 Com ela, verificamos todos os objetos que foram alterados e/ou adicionados no diretório do projeto. A partir dele, devemos informar o que desejamos fazer com cada um deles. Podemos ignorá-los com o botão `Ignore`, para, neste caso, indicarmos que não desejamos que essa informação seja armazenada no repositório. 
 Para os arquivos que queremos armazenar, devemos selecionar e utilizar o botão `Stage`. Após selecionarmos os arquivos a serem enviados, devemos adicionar um cometário geral, para termos noção do que se refere aquela etapa do projeto, e utilizar o botão `Commit`. Com isso, nossos arquivos já estão prontos para serem enviados ao repositório. A última etapa consiste em utilizar o botão `Push`, que, após acionado, solicitará a confirmação do usuário e senha.
+
 Pronto! Seus scripts e arquivos já estão armazenados e versionados no Github. Caso queria continuar o projeto em outro local ou compartilhar as informações com alguém, basta a pessoa fazer um `Pull` do repositório.  
 
 # Encerramento
 
-Essa foi a oficina da PDAD 2018 aplicada ao R. O R é uma ferramenta muito ampla, que permite diversas outras aplicações, principalmente na área estatística. Aqui foi apresentada uma modesta parcela das funcionalidades que esta ferramenta pode oferecer. Ainda há muito mais a ser explorado. Utilizar o R constantemente fará com que você acumule habilidades e avance cada vez mais na utilização desta ferramenta.
+Este foi o minicurso de R aplicado a manipulação de microdados da PDAD 2018. O R é uma ferramenta muito ampla, que permite diversas outras aplicações, principalmente na área estatística. Aqui, foi apresentada uma modesta parcela das funcionalidades que esta ferramenta pode oferecer. Ainda há muito mais a ser explorado. Utilizar o R constantemente fará com que você acumule habilidades e avance cada vez mais na utilização desta ferramenta.
 
 Abaixo você tem uma lista de aplicações analíticas sendo realizadas atualmente com o auxílio do R, segundo o blog [revolution analytics](http://blog.revolutionanalytics.com/2012/07/a-big-list-of-the-things-r-can-do.html)
 
