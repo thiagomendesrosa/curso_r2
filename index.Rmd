@@ -165,7 +165,23 @@ Uma das funções mais básicas é instalar e carregar um pacote no R. Por exemp
 ```{r, warning=FALSE, message=FALSE}
 #install.packages("tidyverse") # Instalar o pacote "tidyverse"
 library(tidyverse) # Carregar o pacote "tidyverse"
+
+pacotes <- c("tidyverse","data.table","Hmisc","lubridate",
+             "ggrepel","sf","sidrar","survey",
+             "srvyr","scales","ggthemr","readxl",
+             "kableExtra","psych","xtable")
+
+
+if(length(setdiff(pacotes,installed.packages()))==0){}else{
+  
+  install.packages(setdiff(pacotes,installed.packages()))
+  
+}
+
+#devtools::install_github('cttobin/ggthemr')
 ```
+
+Alguns pacotes, quando não disponíveis no CRAN (por ainda estar em desenvolvimento ou não terem sido submetidos), podem ser instalados diretamente do `Github`, com a função `devtools::install_github()`.
 
 Note que o caractere `#` é utilizado para escrever comentários na codificação. Documentar bem seu código é fundamental para as pessoas que trabalham com você entendam o que foi realizado. Além disso, é fundamental para que uma tarefa que dependa desse código possa ser executada ou alterada por outro pesquisador. Para comentar uma série de linhas ao mesmo tempo, utilize o atalho `Ctrl`+`Shift`+`C` após selecioná-las.
 
@@ -570,6 +586,14 @@ getAnywhere(describe)[1]
 ```
 
 As funções do tipo `.C()`, `.Call()`, `.Fortran()`, `.External()`, ou `.Internal()` and `.Primitive()` chamam códigos compilados, sendo necessário olhar o código fonte.
+
+Além disso, no RStudio, você conta com as *cheatsheets*, na janela superior de ajuda (`Help`). Você poderá baixar diversos pdfs com "colas" para as principais operações realizadas na análise de dados.
+
+<img src="figuras/cheatsheet.png" style="width: 800px;display: block;margin-left: auto;margin-right: auto "/>
+
+As versões mais recentes do RStudio contam com a aba *Tutorial*, na qual você poderá aprender alguns tópicos diretamente no RStudio.
+
+<img src="figuras/tutorial.png" style="width: 800px;display: block;margin-left: auto;margin-right: auto "/>
 
 Como alternativa, você pode acessar o Github do pacote e verificar a função diretamente do arquivo R. Por exemplo, as funções do pacote `base` estão disponíveis [aqui](https://github.com/SurajGupta/r-source/tree/master/src/library/base/R). Para uma discussão aprofundada sobre o tema, acesse [esse site](https://adv-r.hadley.nz/).
 
@@ -1148,7 +1172,7 @@ Com o R, é possível fazermos mapas com relativa facilidade. Para tanto, precis
 ```{r, eval=FALSE}
 library(ggrepel)
 library(sf)
-library(rgdal)
+
 
 # tf<- "https://www.geoportal.seduh.df.gov.br/static/shapes_download/Regi%C3%B5es%20Administrativas.zip"
 
