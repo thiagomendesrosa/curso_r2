@@ -1512,6 +1512,9 @@ O primeiro passo é criarmos o desenho inicial da pesquisa.
 library(survey)
 library(srvyr)
 
+# Defenir uma semente para reprodutibilidade
+set.seed(8888)
+
 # Declarar o desenho incial
 sample.pdad <- 
   survey::svydesign(id = ~A01nFicha, # Identificador único da unidade amostrada
