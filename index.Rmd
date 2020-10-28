@@ -1741,7 +1741,9 @@ salario <- vars_relatorio %>%
   # Agrupar por faixas de salário
   srvyr::group_by(faixas_salario) %>%
   # Calcular os totais para cada grupo de salário
-  srvyr::summarise(n=survey_total(na.rm=T,vartype = "ci"))
+  srvyr::summarise(n=survey_total(na.rm=T,vartype = "ci")) %>% 
+  # Retirar NA
+  na.omit
 
 # Construir um objeto com o gráfico
 salario_grafico <- salario %>%
@@ -1776,7 +1778,9 @@ salario2 <- vars_relatorio %>%
   # Agrupar por RA e faixas de salário
   srvyr::group_by(RA,faixas_salario) %>%
   # Calcular as proporções por faixa de salário
-  srvyr::summarise(n=survey_mean(na.rm=T,vartype = "ci"))
+  srvyr::summarise(n=survey_mean(na.rm=T,vartype = "ci")) %>%   # Retirar NA
+  na.omit
+  
 # Construir o gráfico
 salario2 %>%
   # Plotar os eixos x e y
