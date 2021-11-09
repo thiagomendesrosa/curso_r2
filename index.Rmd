@@ -173,12 +173,12 @@ pacotes <- c("tidyverse","data.table","Hmisc","lubridate",
 
 
 if(length(setdiff(pacotes,installed.packages()))==0){}else{
-  
+
   install.packages(setdiff(pacotes,installed.packages()))
-  
+
 }
 
-#devtools::install_github('cttobin/ggthemr')
+devtools::install_github('cttobin/ggthemr')
 ```
 
 Alguns pacotes, quando não disponíveis no CRAN (por ainda estar em desenvolvimento ou não terem sido submetidos), podem ser instalados diretamente do `Github`, com a função `devtools::install_github()`.
@@ -630,7 +630,7 @@ Nesta primeira opção, você seleciona o arquivo `.csv` salvo no passo anterior
 Note que, no painel console, o código necessário para carregar a base foi inserido automaticamente. Teste novamente, copiando essa linha de comando e rodando no console.
 
 ```{r}
-dom2018_31ras <- read.csv2("F:/OneDrive/Doutorado/Monitoria FGV/curso_r2/dados/dom2018_31ras.csv")
+dom2018_31ras <- read.csv2("F:/OneDrive/Doutorado/Monitoria FGV/2020/curso_r2/dados/dom2018_31ras.csv")
 ```
 
 Utilize a função `View()` para visualizar a base de dados (inserindo o nome do objeto dentro dos parênteses), ou clique em cima do objeto no painel `Environment`.
@@ -639,7 +639,7 @@ Utilize a função `View()` para visualizar a base de dados (inserindo o nome do
 
 O RStudio apresenta apenas 50 colunas por vez. Clique nas setas para navegar para o próximo conjunto de 50 colunas.
 
-Vamos agora testar o segundo método. Novamente, clique em `Import Dataset`, no atalho do painel `Environment`, mas agora na opção `From Text(readr)`. Agora, ao invés de informar o arquivo que você baixou, basta informar o link onde ele está hospedado. No nosso caso, é o mesmo endereço em que baixamos os dados da [PDAD 2018](http://www.codeplan.df.gov.br/pdad-2018/). Vamos testar com a [base de moradores](http://www.codeplan.df.gov.br/wp-content/uploads/2020/06/dom2018_31ras.csv).
+Vamos agora testar o segundo método. Novamente, clique em `Import Dataset`, no atalho do painel `Environment`, mas agora na opção `From Text(readr)`. Agora, ao invés de informar o arquivo que você baixou, basta informar o link onde ele está hospedado. No nosso caso, é o mesmo endereço em que baixamos os dados da [PDAD 2018](http://www.codeplan.df.gov.br/pdad-2018/). Vamos testar com a [base de moradores](http://www.codeplan.df.gov.br/wp-content/uploads/2020/06/mor2018_31ras.csv).
 
 <img src="figuras/import2.png" style="width: 800px;display: block;margin-left: auto;margin-right: auto "/>
 
@@ -647,7 +647,7 @@ Assim que você inserir o link para a pesquisa, clique em `Update` para visualiz
 
 
 ```{r}
-pdad_2018_moradores <- read_delim("http://www.codeplan.df.gov.br/wp-content/uploads/2020/06/dom2018_31ras.csv", 
+pdad_2018_moradores <- readr::read_delim("http://www.codeplan.df.gov.br/wp-content/uploads/2020/06/mor2018_31ras.csv", 
     ";", escape_double = FALSE, locale = locale(decimal_mark = ",", 
         grouping_mark = ""), trim_ws = TRUE)
 ```
@@ -1896,8 +1896,7 @@ esgotamento2 %>%
                   fontface="bold")
 ```
 
-Alternativamente ao gráfico de setores, podemos fazer um gráfico de coluna 
-agrupada, que fornece o mesmo tipo de informação para este caso.
+Alternativamente ao gráfico de setores, podemos fazer um gráfico de coluna agrupada, que fornece o mesmo tipo de informação para este caso.
 
 ```{r}
 # Construir o objeto com as informações de esgotamento sanitário
@@ -2108,6 +2107,9 @@ O relatório criado em PDF pode ser facilmente gerado em outros formatos. Experi
 Para configurar suas credenciais no github, digite no terminal os seguintes comandos:
 
 - git config --global user.name "seu nome de usuário"
+- git config --global user.email "seu nome de e-mail"
+
+Se quiser configurar sua senha, utilize o comando abaixo:
 - git config --global user.password "sua senha"
 
 Depois de produzirmos nossos códigos, vamos subir as informações para o nosso repositório no GitHub. Para isso, temos três opões:
@@ -2122,7 +2124,8 @@ Pelo primeiro e terceiro métodos, a janela abaixo será exibida. Com o segundo 
 
 <img src="figuras/git_commit.png" style="width: 800px;display: block;margin-left: auto;margin-right: auto "/>
 
-Com ela, verificamos todos os objetos que foram alterados e/ou adicionados no diretório do projeto. A partir dele, devemos informar o que desejamos fazer com cada um deles. Podemos ignorá-los com o botão `Ignore`, para, neste caso, indicarmos que não desejamos que essa informação seja armazenada no repositório. 
+Com ela, verificamos todos os objetos que foram modificados, removidos e/ou adicionados no diretório do projeto. A partir dele, devemos informar o que desejamos fazer com cada um deles. Podemos ignorá-los com o botão `Ignore`, para, neste caso, indicarmos que não desejamos que essa informação seja armazenada no repositório. 
+
 Para os arquivos que queremos armazenar, devemos selecionar e utilizar o botão `Stage`. Após selecionarmos os arquivos a serem enviados, devemos adicionar um cometário geral, para termos noção do que se refere aquela etapa do projeto, e utilizar o botão `Commit`. Com isso, nossos arquivos já estão prontos para serem enviados ao repositório. A última etapa consiste em utilizar o botão `Push`, que, após acionado, solicitará a confirmação do usuário e senha.
 
 Pronto! Seus scripts e arquivos já estão armazenados e versionados no Github. Caso queria continuar o projeto em outro local ou compartilhar as informações com alguém, basta a pessoa fazer um `Pull` do repositório.  
